@@ -34,14 +34,15 @@ export function StepIntro({ onNext }: StepIntroProps) {
       initial="hidden"
       animate="show"
     >
-      {/* Top section: Logo, headline, description — mobile-first stacking */}
-      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-2 sm:gap-3 lg:gap-4 px-16 sm:px-20 lg:px-40 pt-6 sm:pt-8 lg:pt-12 pb-1 sm:pb-2 lg:pb-3 shrink-0">
-        <div className="flex-1 min-w-0">
+      {/* Top section: Logo, headline (left) | description (right) — constrained width, aligned edges */}
+      <div className="w-full max-w-6xl mx-auto px-16 sm:px-20 lg:px-12 pt-6 sm:pt-8 lg:pt-12 pb-1 sm:pb-2 lg:pb-3 shrink-0">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-2 sm:gap-3 lg:gap-8 pt-0">
+        <div className="flex-1 min-w-0 lg:max-w-[55%]">
           <motion.div className="mb-3 sm:mb-4" variants={item}>
             <CriterionLogo className="h-6 sm:h-7 w-auto" color="white" />
           </motion.div>
           <motion.h1
-            className="text-4xl sm:text-5xl md:text-5xl lg:text-6xl xl:text-7xl leading-tight text-white font-normal"
+            className="text-4xl sm:text-5xl md:text-5xl lg:text-6xl xl:text-7xl leading-tight text-white font-normal text-left"
             style={{ fontFamily: "var(--font-freeman), serif" }}
             variants={item}
           >
@@ -50,31 +51,32 @@ export function StepIntro({ onNext }: StepIntroProps) {
             life awaits.
           </motion.h1>
         </div>
-        <div className="flex flex-col items-start gap-[26px] lg:max-w-[437px] shrink-0 w-full lg:w-auto">
-          <motion.div className="flex justify-start" variants={item}>
+        <div className="flex flex-col items-start lg:items-end gap-[26px] lg:max-w-[437px] shrink-0 w-full lg:w-auto">
+          <motion.div className="flex justify-start lg:justify-end" variants={item}>
             <CriterionSymbol className="h-8 sm:h-10 w-auto" color="blue" />
           </motion.div>
           <motion.p
-            className="text-white text-base sm:text-lg lg:text-xl leading-relaxed font-light text-left"
+            className="text-white text-base sm:text-lg lg:text-xl leading-relaxed font-light text-left lg:text-right"
             variants={item}
           >
             Let&apos;s start your journey with Criterion. In just a few minutes you&apos;ll
             have access to banking that truly understands your needs.
           </motion.p>
         </div>
+        </div>
       </div>
 
-      {/* Hero image — mobile uses heroimg-mobile, desktop uses heroimg3 */}
-      <div className="relative flex-1 flex items-center justify-center min-h-[320px] px-16 sm:px-20 lg:px-40 pb-2 sm:pb-3 lg:pb-4 pt-1 sm:pt-2 lg:pt-3 overflow-hidden">
+      {/* Hero image — spans full content width, aligns with text block edges */}
+      <div className="relative flex-1 flex min-h-[320px] w-full max-w-6xl mx-auto px-16 sm:px-20 lg:px-12 pb-2 sm:pb-3 lg:pb-4 pt-1 sm:pt-2 lg:pt-3 overflow-hidden">
         <motion.div
-          className="relative w-full h-full min-h-[280px] rounded-2xl sm:rounded-3xl overflow-hidden md:hidden flex-1"
+          className="relative w-full aspect-[4/3] md:aspect-video min-h-[280px] rounded-2xl sm:rounded-3xl overflow-hidden md:hidden"
           variants={item}
         >
           <Image
             src="/heroimg-mobile.png"
             alt="Welcome to Criterion"
             fill
-            className="object-contain"
+            className="object-cover object-center"
             sizes="100vw"
             priority
           />
@@ -103,14 +105,14 @@ export function StepIntro({ onNext }: StepIntroProps) {
           </div>
         </motion.div>
         <motion.div
-          className="relative w-full h-full min-h-[280px] rounded-3xl overflow-hidden hidden md:flex isolate flex-1"
+          className="relative w-full aspect-video min-h-[280px] rounded-3xl overflow-hidden hidden md:block"
           variants={item}
         >
           <Image
             src="/heroimg3.png"
             alt="Welcome to Criterion"
             fill
-            className="object-contain object-center"
+            className="object-cover object-center"
             sizes="100vw"
             priority
           />

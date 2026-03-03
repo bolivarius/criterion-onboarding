@@ -191,7 +191,7 @@ export default function Home() {
         </AnimatePresence>
         {/* Disclaimer — only on initial (0) and final (6) screens */}
         {(currentStep === 0 || currentStep === 6) && (
-          <div className={`shrink-0 ${currentStep === 0 ? "py-3 px-16 sm:px-20 lg:px-40" : "pt-6 pb-6 px-6 lg:px-12"}`}>
+          <div className={`shrink-0 max-w-6xl mx-auto w-full ${currentStep === 0 ? "py-3 px-16 sm:px-20 lg:px-12" : "pt-6 pb-6 px-6 lg:px-12"}`}>
             <Disclaimer />
           </div>
         )}
