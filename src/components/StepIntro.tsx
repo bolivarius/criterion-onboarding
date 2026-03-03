@@ -65,9 +65,9 @@ export function StepIntro({ onNext }: StepIntroProps) {
       </div>
 
       {/* Hero image — mobile uses heroimg-mobile, desktop uses heroimg3 */}
-      <div className="relative flex-1 flex items-center justify-center min-h-0 px-16 sm:px-20 lg:px-40 pb-2 sm:pb-3 lg:pb-4 pt-1 sm:pt-2 lg:pt-3 overflow-hidden">
+      <div className="relative flex-1 flex items-center justify-center min-h-[320px] px-16 sm:px-20 lg:px-40 pb-2 sm:pb-3 lg:pb-4 pt-1 sm:pt-2 lg:pt-3 overflow-hidden">
         <motion.div
-          className="relative w-full h-full min-h-0 rounded-2xl sm:rounded-3xl overflow-hidden md:hidden flex-1"
+          className="relative w-full h-full min-h-[280px] rounded-2xl sm:rounded-3xl overflow-hidden md:hidden flex-1"
           variants={item}
         >
           <Image
@@ -103,7 +103,7 @@ export function StepIntro({ onNext }: StepIntroProps) {
           </div>
         </motion.div>
         <motion.div
-          className="relative w-full h-full min-h-0 rounded-3xl overflow-hidden hidden md:flex isolate flex-1"
+          className="relative w-full h-full min-h-[280px] rounded-3xl overflow-hidden hidden md:flex isolate flex-1"
           variants={item}
         >
           <Image
