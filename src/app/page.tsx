@@ -1,64 +1,196 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import dynamic from "next/dynamic";
+import { AnimatePresence, motion } from "framer-motion";
+import { ProgressBar } from "@/components/ProgressBar";
+import { StepWelcome } from "@/components/StepWelcome";
+import { StepAccountType } from "@/components/StepAccountType";
+import { StepAnnualIncome } from "@/components/StepAnnualIncome";
+import { StepGoals } from "@/components/StepGoals";
+import { StepSuccess } from "@/components/StepSuccess";
+import { CriterionLogo } from "@/components/CriterionLogo";
+import { Disclaimer } from "@/components/Disclaimer";
+
+const StepIntro = dynamic(() => import("@/components/StepIntro").then((m) => ({ default: m.StepIntro })), {
+  loading: () => <div className="flex-1 flex items-center justify-center min-h-screen" />,
+});
+
+const StepCardCustomization = dynamic(
+  () => import("@/components/StepCardCustomization").then((m) => ({ default: m.StepCardCustomization })),
+  { ssr: false, loading: () => <div className="flex-1 flex items-center justify-center min-h-[500px]" /> }
+);
+
+const STEP_LABELS = ["Details", "Priorities", "Account", "Income", "Card", "Done"];
+
+const TOTAL_STEPS = 7; // Intro + 6 form steps
 
 export default function Home() {
+  const [currentStep, setCurrentStep] = useState(0);
+
+  const [personalData, setPersonalData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    cpf: "",
+    birthDate: "",
+  });
+
+  const [accountData, setAccountData] = useState({
+    accountType: "",
+    annualIncome: "",
+  });
+
+  const [goalsData, setGoalsData] = useState({
+    priorities: [] as string[],
+  });
+
+  const [cardData, setCardData] = useState({
+    cardSkin: "dark",
+    cardName: "",
+  });
+
+  const handlePersonalChange = (field: string, value: string) => {
+    setPersonalData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleAccountChange = (field: string, value: string) => {
+    setAccountData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleGoalsChange = (field: string, value: string[]) => {
+    setGoalsData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleCardChange = (field: string, value: string) => {
+    setCardData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const goNext = () => setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS - 1));
+  const goBack = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
+
+  const goToStep = (progressIndex: number) => {
+    setCurrentStep(progressIndex + 1);
+  };
+
+  const formProgressIndex = currentStep - 1;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="min-h-screen bg-criterion-dark relative overflow-hidden">
+      {/* Ambient background */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div
+          className="absolute -top-[40%] -right-[20%] w-[80%] h-[80%] rounded-full opacity-[0.02]"
+          style={{
+            background: "radial-gradient(circle, #64E1FB 0%, transparent 70%)",
+          }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+        <div
+          className="absolute -bottom-[30%] -left-[20%] w-[60%] h-[60%] rounded-full opacity-[0.02]"
+          style={{
+            background: "radial-gradient(circle, #C1D463 0%, transparent 70%)",
+          }}
+        />
+      </div>
+
+      {/* Header — hidden on intro, card step, and success */}
+      {currentStep !== 0 && currentStep !== 5 && currentStep !== 6 && (
+        <header className="relative z-10 px-6 lg:px-12 py-6 flex items-center justify-between">
+          <CriterionLogo className="h-6 w-auto" />
+          {currentStep < 6 && (
+            <div className="hidden md:block text-xs text-white/30">
+              Step {currentStep} of {STEP_LABELS.length}
+            </div>
+          )}
+        </header>
+      )}
+
+      {/* Progress — hidden on intro (0) and success (6); card step (5) renders it inside */}
+      {currentStep >= 1 && currentStep <= 4 && (
+        <div className="relative z-10 px-6 lg:px-12 mb-8">
+          <ProgressBar
+            currentStep={formProgressIndex}
+            totalSteps={STEP_LABELS.length}
+            labels={STEP_LABELS}
+            onStepClick={goToStep}
+          />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      )}
+
+      {/* Content */}
+      <main className={`relative z-10 flex flex-col ${currentStep === 0 ? "h-screen overflow-hidden" : ""} ${currentStep === 5 ? "" : currentStep !== 0 ? "px-6 lg:px-12 pb-12" : ""}`}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            className={
+              currentStep === 0
+                ? "flex-1 flex flex-col min-h-0 overflow-hidden"
+                : ""
+            }
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -40 }}
+            transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+            {currentStep === 0 && <StepIntro onNext={goNext} />}
+            {currentStep === 1 && (
+              <StepWelcome
+                data={personalData}
+                onChange={handlePersonalChange}
+                onNext={goNext}
+                onBack={goBack}
+              />
+            )}
+            {currentStep === 2 && (
+              <StepGoals
+                data={goalsData}
+                onChange={handleGoalsChange}
+                onNext={goNext}
+                onBack={goBack}
+              />
+            )}
+            {currentStep === 3 && (
+              <StepAccountType
+                data={accountData}
+                onChange={handleAccountChange}
+                onNext={goNext}
+                onBack={goBack}
+              />
+            )}
+            {currentStep === 4 && (
+              <StepAnnualIncome
+                data={accountData}
+                onChange={handleAccountChange}
+                onNext={goNext}
+                onBack={goBack}
+              />
+            )}
+            {currentStep === 5 && (
+              <StepCardCustomization
+                data={cardData}
+                personalName={personalData.fullName}
+                onChange={handleCardChange}
+                onNext={goNext}
+                onBack={goBack}
+                currentStep={formProgressIndex}
+                totalSteps={STEP_LABELS.length}
+                stepLabels={STEP_LABELS}
+              />
+            )}
+            {currentStep === 6 && (
+              <StepSuccess
+                personalName={personalData.fullName}
+                accountType={accountData.accountType}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
+        {/* Disclaimer — only on initial (0) and final (6) screens */}
+        {(currentStep === 0 || currentStep === 6) && (
+          <div className={`shrink-0 ${currentStep === 0 ? "py-3 px-16 sm:px-20 lg:px-40" : "pt-6 pb-6 px-6 lg:px-12"}`}>
+            <Disclaimer />
+          </div>
+        )}
       </main>
     </div>
   );
