@@ -30,6 +30,14 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 | `npm run start` | Start production server |
 | `npm run lint` | Run ESLint |
 
-## Deploy on Vercel
+## Deployment
 
-[Deploy with Vercel](https://vercel.com/new) for the easiest way to host this Next.js app.
+This app is configured for **Firebase Hosting**. Deploy with:
+
+```bash
+npm run deploy
+```
+
+**Live site:** [https://criterion-onboarding.web.app](https://criterion-onboarding.web.app)
+
+See [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) for first-time Firebase setup.

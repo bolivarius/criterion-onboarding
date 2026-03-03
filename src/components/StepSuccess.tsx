@@ -33,13 +33,13 @@ export function StepSuccess({ personalName, accountType: _accountType }: StepSuc
       animate="show"
     >
       {/* Criterion logo — above title, centered */}
-      <motion.div className="mb-6" variants={item}>
+      <motion.div className="mb-8" variants={item}>
         <CriterionLogo className="mx-auto h-8 w-auto" color="white" />
       </motion.div>
 
       {/* Title */}
       <motion.h1
-        className="text-4xl lg:text-6xl mb-4"
+        className="text-4xl lg:text-6xl mb-6"
         style={{ fontFamily: "var(--font-freeman), serif" }}
         variants={item}
       >
@@ -47,7 +47,7 @@ export function StepSuccess({ personalName, accountType: _accountType }: StepSuc
       </motion.h1>
 
       <motion.p
-        className="text-xl text-white/50 font-light mb-6 max-w-lg mx-auto"
+        className="text-xl text-white/50 font-light mb-8 max-w-lg mx-auto"
         variants={item}
       >
         You have successfully joined the waitlist. We&apos;ll notify you when we&apos;re ready.
@@ -55,7 +55,7 @@ export function StepSuccess({ personalName, accountType: _accountType }: StepSuc
 
       {/* Launch time box */}
       <motion.div
-        className="bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] rounded-2xl px-8 py-4 mb-6 inline-block"
+        className="bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] rounded-2xl px-8 py-4 mb-8 inline-block"
         variants={item}
       >
         <span className="text-white/70 text-lg">Launch time: </span>
@@ -63,7 +63,7 @@ export function StepSuccess({ personalName, accountType: _accountType }: StepSuc
       </motion.div>
 
       {/* Action buttons */}
-      <motion.div className="grid md:grid-cols-2 gap-4 max-w-lg mx-auto mb-6" variants={item}>
+      <motion.div className="grid md:grid-cols-2 gap-4 max-w-lg mx-auto mb-10" variants={item}>
         <motion.button
           className="flex items-center justify-center gap-3 py-4 px-6 rounded-2xl bg-criterion-blue text-criterion-dark font-medium hover:shadow-lg hover:shadow-criterion-blue/20 transition-all duration-300"
           whileHover={{ scale: 1.02 }}
@@ -83,7 +83,7 @@ export function StepSuccess({ personalName, accountType: _accountType }: StepSuc
       </motion.div>
 
       {/* Footer — symbol only */}
-      <motion.div className="pt-6" variants={item}>
+      <motion.div className="pt-10" variants={item}>
         <CriterionSymbol className="mx-auto opacity-40 h-5 w-auto" color="white" />
       </motion.div>
     </motion.div>

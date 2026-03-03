@@ -76,7 +76,7 @@ export default function Home() {
   const formProgressIndex = currentStep - 1;
 
   return (
-    <div className="min-h-screen bg-criterion-dark relative overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-criterion-dark relative overflow-hidden">
       {/* Ambient background */}
       <div className="fixed inset-0 pointer-events-none">
         <div
@@ -118,14 +118,18 @@ export default function Home() {
       )}
 
       {/* Content */}
-      <main className={`relative z-10 flex flex-col ${currentStep === 0 ? "h-screen overflow-hidden" : ""} ${currentStep === 5 ? "" : currentStep !== 0 ? "px-6 lg:px-12 pb-12" : ""}`}>
+      <main
+        className={`relative z-10 flex flex-1 flex-col min-h-0 ${currentStep === 0 ? "h-screen overflow-hidden" : ""} ${currentStep === 5 ? "" : currentStep !== 0 ? "px-6 lg:px-12 pb-12" : ""}`}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
             className={
               currentStep === 0
                 ? "flex-1 flex flex-col min-h-0 overflow-hidden"
-                : ""
+                : currentStep === 6
+                  ? "flex-1 flex items-center justify-center"
+                  : ""
             }
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
