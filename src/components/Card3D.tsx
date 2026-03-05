@@ -1031,7 +1031,7 @@ export default function Card3DCanvas({
       >
         <Suspense fallback={null}>
           {/* Lighting — high ambient preserves base colors, directional + env give reflexes */}
-          <ambientLight intensity={0.22} />
+          <ambientLight intensity={0.98} />
           <directionalLight
             position={[3, 4, 5]}
             intensity={1.0}
