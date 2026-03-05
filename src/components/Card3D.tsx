@@ -599,7 +599,7 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange, flipTrigge
   // Card dimensions
   const CARD_W = 3.4;
   const CARD_H = CARD_W / 1.586;
-  const CARD_D = 0.06;
+  const CARD_D = 0.048; // 20% thinner than 0.06
   const CARD_R = CARD_W * 0.035; // corner radius matching texture
 
   // Procedural env map
