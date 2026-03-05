@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowLeft, RotateCw } from "lucide-react";
+import { ArrowLeft, RotateCw, Pointer } from "lucide-react";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { CriterionLogo, CriterionSymbol } from "./CriterionLogo";
 import dynamic from "next/dynamic";
@@ -273,8 +273,8 @@ export function StepCardCustomization({
           flipTrigger={flipTrigger}
         />
 
-        {/* Hint — clickable rotate icon + disclaimer */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
+        {/* Hint — clickable rotate icon + disclaimer (moved slightly up) */}
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
           <button
             type="button"
             onClick={() => setFlipTrigger((t) => t + 1)}
@@ -283,8 +283,9 @@ export function StepCardCustomization({
           >
             <RotateCw className="w-5 h-5 text-white" strokeWidth={2} />
           </button>
-          <p className="text-sm text-white/60 bg-black/20 backdrop-blur-sm rounded-full px-5 py-2">
+          <p className="text-sm text-white/60 bg-black/20 backdrop-blur-sm rounded-full px-5 py-2 flex items-center gap-1.5">
             {showingBack ? "Viewing back" : "Viewing front"} · drag to rotate
+            <Pointer className="w-3.5 h-3.5 text-white/70 flex-shrink-0" strokeWidth={2} />
           </p>
         </div>
       </motion.div>

@@ -680,11 +680,11 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange, flipTrigge
         normalScale: new THREE.Vector2(0.15, 0.15),
         roughness: 0.28,
         metalness: 0.05,
-        clearcoat: 0.6,
-        clearcoatRoughness: 0.15,
-        reflectivity: 0.4,
+        clearcoat: 0.5,
+        clearcoatRoughness: 0.2,
+        reflectivity: 0.3,
         envMap: envMap,
-        envMapIntensity: 0.2,
+        envMapIntensity: 0,
       }),
     [frontRes.texture, normalMap, envMap]
   );
@@ -697,11 +697,11 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange, flipTrigge
         normalScale: new THREE.Vector2(0.15, 0.15),
         roughness: 0.28,
         metalness: 0.05,
-        clearcoat: 0.6,
-        clearcoatRoughness: 0.15,
-        reflectivity: 0.4,
+        clearcoat: 0.5,
+        clearcoatRoughness: 0.2,
+        reflectivity: 0.3,
         envMap: envMap,
-        envMapIntensity: 0.2,
+        envMapIntensity: 0,
       }),
     [backRes.texture, normalMap, envMap]
   );
@@ -754,6 +754,7 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange, flipTrigge
   // Flip-on-click: when flipTrigger changes, animate to opposite side
   const lastFlipTrigger = useRef(flipTrigger ?? 0);
   const flipTargetRotY = useRef<number | null>(null);
+  const returnToFrontAt = useRef<number | null>(null); // 2s after showing back, flip to front
 
   // Keep mousePos ref in sync
   useEffect(() => {
@@ -838,23 +839,24 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange, flipTrigge
     if (!groupRef.current) return;
     const d = Math.min(delta, 0.05);
 
-    // Entrance: tilt left -> right -> settle, with vertical lean back throughout
+    // Entrance: tilt left -> right -> settle, with vertical lean back (bottom forward)
     if (entranceStartTime.current !== null) {
       const elapsed = (Date.now() - entranceStartTime.current) / 1000;
       const t = Math.min(elapsed / entranceDuration, 1);
-      // Keyframes: 0% left+lean, 50% right+max lean, 100% settle
+      // Keyframes: 0% left+lean back, 50% right+max lean back, 100% settle
+      // Negative rotX = top away, bottom forward (lean back)
       let rotY: number;
       let rotX: number;
       if (t < 0.5) {
         const u = t * 2; // 0..1 over first half
         const ease = 1 - (1 - u) * (1 - u);
         rotY = -0.45 + (0.35 - -0.45) * ease;
-        rotX = 0.12 + (0.2 - 0.12) * ease;
+        rotX = -0.25 + (-0.4 - -0.25) * ease;
       } else {
         const u = (t - 0.5) * 2; // 0..1 over second half
         const ease = 1 - (1 - u) * (1 - u);
         rotY = 0.35 + (-0.08 - 0.35) * ease;
-        rotX = 0.2 + (0.03 - 0.2) * ease;
+        rotX = -0.4 + (-0.06 - -0.4) * ease;
       }
       currentRotY.current = rotY;
       currentRotX.current = rotX;
@@ -869,6 +871,12 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange, flipTrigge
       return;
     }
 
+    // 2s timer: after showing back, flip to front
+    if (returnToFrontAt.current !== null && Date.now() >= returnToFrontAt.current) {
+      returnToFrontAt.current = null;
+      flipTargetRotY.current = 0;
+    }
+
     // Flip-on-click: animate toward target rotation
     if (flipTargetRotY.current !== null) {
       const target = flipTargetRotY.current;
@@ -881,6 +889,11 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange, flipTrigge
         flipTargetRotY.current = null;
         startTime.current = Date.now();
         idleActive.current = true;
+        if (Math.abs(target - Math.PI) < 0.1) {
+          returnToFrontAt.current = Date.now() + 2000;
+        } else {
+          returnToFrontAt.current = null; // User flipped to front manually
+        }
       }
       return;
     }
@@ -946,7 +959,7 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange, flipTrigge
   });
 
   return (
-    <group ref={groupRef} rotation={[0.12, -0.45, 0]}>
+    <group ref={groupRef} rotation={[-0.25, -0.45, 0]}>
       <mesh geometry={geometry} material={materials} castShadow receiveShadow />
     </group>
   );
