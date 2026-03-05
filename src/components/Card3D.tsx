@@ -672,12 +672,21 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange, flipTrigge
   }, [skin.id, skin.bg, skin.textColor, backRes]);
 
   /* ─── Materials (stable, update properties imperatively) ─── */
-  // Image-based cards: MeshBasicMaterial to preserve exact design colors (no PBR lighting alter)
-  // Procedural cards: MeshPhysicalMaterial for proper lighting/shading
+  // Image cards: PBR with high ambient compensation — exact base colors + lighting reflexes
+  // Procedural cards: standard PBR
   const frontMat = useMemo(() => {
     if (skin.frontImage) {
-      return new THREE.MeshBasicMaterial({
+      return new THREE.MeshPhysicalMaterial({
         map: frontRes.texture,
+        color: 0xffffff,
+        normalMap: null,
+        roughness: 0.25,
+        metalness: 0.02,
+        clearcoat: 0.7,
+        clearcoatRoughness: 0.1,
+        reflectivity: 0.5,
+        envMap: envMap,
+        envMapIntensity: 0.25,
       });
     }
     return new THREE.MeshPhysicalMaterial({
@@ -992,7 +1001,7 @@ export default function Card3DCanvas({
           antialias: true,
           alpha: true,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.35,
+          toneMappingExposure: 1.15,
         }}
         style={{ background: "transparent" }}
         onCreated={({ gl: renderer }) => {
@@ -1000,11 +1009,11 @@ export default function Card3DCanvas({
         }}
       >
         <Suspense fallback={null}>
-          {/* Lighting */}
-          <ambientLight intensity={0.5} />
+          {/* Lighting — high ambient preserves base colors, directional + env give reflexes */}
+          <ambientLight intensity={0.92} />
           <directionalLight
             position={[3, 4, 5]}
-            intensity={1.2}
+            intensity={1.0}
             castShadow
             shadow-mapSize-width={1024}
             shadow-mapSize-height={1024}
