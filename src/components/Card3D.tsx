@@ -672,23 +672,28 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange, flipTrigge
   }, [skin.id, skin.bg, skin.textColor, backRes]);
 
   /* ─── Materials (stable, update properties imperatively) ─── */
-  const frontMat = useMemo(
-    () =>
-      new THREE.MeshPhysicalMaterial({
+  // Image-based cards: MeshBasicMaterial to preserve exact design colors (no PBR lighting alter)
+  // Procedural cards: MeshPhysicalMaterial for proper lighting/shading
+  const frontMat = useMemo(() => {
+    if (skin.frontImage) {
+      return new THREE.MeshBasicMaterial({
         map: frontRes.texture,
-        color: 0xffffff,
-        normalMap: skin.frontImage ? null : normalMap,
-        normalScale: skin.frontImage ? new THREE.Vector2(0, 0) : new THREE.Vector2(0.15, 0.15),
-        roughness: 0.3,
-        metalness: 0.02,
-        clearcoat: 0.2,
-        clearcoatRoughness: 0.3,
-        reflectivity: 0.2,
-        envMap: envMap,
-        envMapIntensity: 0,
-      }),
-    [frontRes.texture, normalMap, envMap, skin.frontImage]
-  );
+      });
+    }
+    return new THREE.MeshPhysicalMaterial({
+      map: frontRes.texture,
+      color: 0xffffff,
+      normalMap: normalMap,
+      normalScale: new THREE.Vector2(0.15, 0.15),
+      roughness: 0.3,
+      metalness: 0.02,
+      clearcoat: 0.2,
+      clearcoatRoughness: 0.3,
+      reflectivity: 0.2,
+      envMap: envMap,
+      envMapIntensity: 0,
+    });
+  }, [frontRes.texture, normalMap, envMap, skin.frontImage]);
 
   const backMat = useMemo(
     () =>
@@ -987,7 +992,7 @@ export default function Card3DCanvas({
           antialias: true,
           alpha: true,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.25,
+          toneMappingExposure: 1.35,
         }}
         style={{ background: "transparent" }}
         onCreated={({ gl: renderer }) => {
