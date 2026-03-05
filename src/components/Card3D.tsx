@@ -766,6 +766,7 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange, flipTrigge
   // Entrance animation: tilt left -> right -> settle, with vertical lean back
   const entranceStartTime = useRef<number | null>(Date.now());
   const entranceDuration = 2; // seconds
+  const lastSkinId = useRef(skin.id);
   // Flip-on-click: when flipTrigger changes, animate to opposite side
   const lastFlipTrigger = useRef(flipTrigger ?? 0);
   const flipTargetRotY = useRef<number | null>(null);
@@ -775,6 +776,26 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange, flipTrigge
   useEffect(() => {
     mousePosRef.current = mousePos ?? null;
   }, [mousePos]);
+
+  // When skin changes, retrigger entrance animation
+  useEffect(() => {
+    if (skin.id !== lastSkinId.current) {
+      lastSkinId.current = skin.id;
+      entranceStartTime.current = Date.now();
+      currentRotY.current = -0.45;
+      currentRotX.current = -0.25;
+      targetRotY.current = -0.45;
+      targetRotX.current = -0.25;
+      flipTargetRotY.current = null;
+      returnToFrontAt.current = null;
+      if (groupRef.current) {
+        groupRef.current.rotation.x = -0.25;
+        groupRef.current.rotation.y = -0.45;
+      }
+      idleActive.current = false;
+      momentumActive.current = false;
+    }
+  }, [skin.id]);
 
   // When flipTrigger increments, queue flip to opposite side
   useEffect(() => {
@@ -1010,7 +1031,7 @@ export default function Card3DCanvas({
       >
         <Suspense fallback={null}>
           {/* Lighting — high ambient preserves base colors, directional + env give reflexes */}
-          <ambientLight intensity={0.92} />
+          <ambientLight intensity={0.22} />
           <directionalLight
             position={[3, 4, 5]}
             intensity={1.0}
