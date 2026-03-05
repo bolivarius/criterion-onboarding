@@ -676,17 +676,18 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange, flipTrigge
     () =>
       new THREE.MeshPhysicalMaterial({
         map: frontRes.texture,
-        normalMap: normalMap,
-        normalScale: new THREE.Vector2(0.15, 0.15),
-        roughness: 0.28,
-        metalness: 0.05,
-        clearcoat: 0.5,
-        clearcoatRoughness: 0.2,
-        reflectivity: 0.3,
+        color: 0xffffff,
+        normalMap: skin.frontImage ? null : normalMap,
+        normalScale: skin.frontImage ? new THREE.Vector2(0, 0) : new THREE.Vector2(0.15, 0.15),
+        roughness: 0.3,
+        metalness: 0.02,
+        clearcoat: 0.2,
+        clearcoatRoughness: 0.3,
+        reflectivity: 0.2,
         envMap: envMap,
         envMapIntensity: 0,
       }),
-    [frontRes.texture, normalMap, envMap]
+    [frontRes.texture, normalMap, envMap, skin.frontImage]
   );
 
   const backMat = useMemo(
@@ -986,7 +987,7 @@ export default function Card3DCanvas({
           antialias: true,
           alpha: true,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.1,
+          toneMappingExposure: 1.25,
         }}
         style={{ background: "transparent" }}
         onCreated={({ gl: renderer }) => {
