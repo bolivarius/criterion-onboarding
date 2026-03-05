@@ -908,9 +908,14 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange, flipTrigge
     }
 
     // 2s timer: after showing back, flip to front
-    if (returnToFrontAt.current !== null && Date.now() >= returnToFrontAt.current) {
-      returnToFrontAt.current = null;
-      flipTargetRotY.current = 0;
+    if (returnToFrontAt.current !== null) {
+      if (Date.now() >= returnToFrontAt.current) {
+        returnToFrontAt.current = null;
+        flipTargetRotY.current = 0;
+      } else {
+        // Hold card on back — don't run idle/momentum (they would lerp back to front)
+        return;
+      }
     }
 
     // Flip-on-click: animate toward target rotation
