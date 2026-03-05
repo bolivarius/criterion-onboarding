@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, RotateCw } from "lucide-react";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { CriterionLogo, CriterionSymbol } from "./CriterionLogo";
 import dynamic from "next/dynamic";
@@ -263,11 +263,6 @@ export function StepCardCustomization({
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: "url('/sky-bg.jpg')" }}
         />
-        {/* Subtle vignette overlay */}
-        <div className="absolute inset-0" style={{
-          background: "radial-gradient(ellipse at center, transparent 40%, rgba(19,46,33,0.15) 100%)",
-        }} />
-
         {/* 3D Card (Three.js Canvas — fills the entire sky panel) */}
         <Card3DCanvas
           skin={selectedSkin}
@@ -276,9 +271,12 @@ export function StepCardCustomization({
           onShowingBackChange={setShowingBack}
         />
 
-        {/* Hint */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
-          <p className="text-[11px] text-white/40 bg-black/20 backdrop-blur-sm rounded-full px-4 py-1.5">
+        {/* Hint — drag icon + disclaimer */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
+          <div className="w-11 h-11 rounded-full border-2 border-white/50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
+            <RotateCw className="w-5 h-5 text-white" strokeWidth={2} />
+          </div>
+          <p className="text-sm text-white/60 bg-black/20 backdrop-blur-sm rounded-full px-5 py-2">
             {showingBack ? "Viewing back" : "Viewing front"} · drag to rotate
           </p>
         </div>

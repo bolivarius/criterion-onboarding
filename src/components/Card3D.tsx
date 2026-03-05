@@ -243,27 +243,27 @@ function renderFrontTexture(
   ctx.clip();
 
   // Background: image if available, else procedural bg + pattern
-  if (frontImage && frontImage.complete && frontImage.naturalWidth) {
+  const useImage = !!(frontImage && frontImage.complete && frontImage.naturalWidth);
+  if (useImage) {
     ctx.drawImage(frontImage, 0, 0, w, h);
+    // No overlay/gradient on card images — preserve realistic colors
   } else {
     ctx.fillStyle = skin.bg;
     ctx.fillRect(0, 0, w, h);
     if (skin.pattern === "geometric") drawGeoPattern(ctx, w, h);
     if (skin.pattern === "bold") drawBoldPattern(ctx, w, h);
+    // Specular highlight band — only for procedural cards
+    const grad = ctx.createLinearGradient(0, h, w, 0);
+    grad.addColorStop(0, "rgba(255,255,255,0)");
+    grad.addColorStop(0.35, "rgba(255,255,255,0)");
+    grad.addColorStop(0.48, "rgba(255,255,255,0.04)");
+    grad.addColorStop(0.52, "rgba(255,255,255,0.04)");
+    grad.addColorStop(0.65, "rgba(255,255,255,0)");
+    grad.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
   }
 
-  // Specular highlight band — subtle diagonal
-  const grad = ctx.createLinearGradient(0, h, w, 0);
-  grad.addColorStop(0, "rgba(255,255,255,0)");
-  grad.addColorStop(0.35, "rgba(255,255,255,0)");
-  grad.addColorStop(0.48, "rgba(255,255,255,0.04)");
-  grad.addColorStop(0.52, "rgba(255,255,255,0.04)");
-  grad.addColorStop(0.65, "rgba(255,255,255,0)");
-  grad.addColorStop(1, "rgba(255,255,255,0)");
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, w, h);
-
-  const useImage = !!(frontImage && frontImage.complete && frontImage.naturalWidth);
   const overlayColor = useImage && skin.overlayColor ? skin.overlayColor : skin.textColor;
 
   // Criterion Logo — skip when using image
@@ -746,6 +746,9 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange }: Card3DPr
   const momentumActive = useRef(false);
   const lastShowingBack = useRef(false);
   const mousePosRef = useRef<{ x: number; y: number } | null>(null);
+  // Entrance animation: tilt from left to right, leaning back, to show light effect
+  const entranceStartTime = useRef<number | null>(Date.now());
+  const entranceDuration = 1.2; // seconds
 
   // Keep mousePos ref in sync
   useEffect(() => {
@@ -817,6 +820,28 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange }: Card3DPr
     if (!groupRef.current) return;
     const d = Math.min(delta, 0.05);
 
+    // Entrance: tilt from left to right, leaning back
+    if (entranceStartTime.current !== null) {
+      const elapsed = (Date.now() - entranceStartTime.current) / 1000;
+      const t = Math.min(elapsed / entranceDuration, 1);
+      const easeOut = 1 - (1 - t) * (1 - t); // ease-out quad
+      const startY = -0.45;
+      const endY = -0.08;
+      const startX = 0.12;
+      const endX = 0.03;
+      currentRotY.current = startY + (endY - startY) * easeOut;
+      currentRotX.current = startX + (endX - startX) * easeOut;
+      groupRef.current.rotation.y = currentRotY.current;
+      groupRef.current.rotation.x = currentRotX.current;
+      targetRotY.current = currentRotY.current;
+      targetRotX.current = currentRotX.current;
+      if (t >= 1) {
+        entranceStartTime.current = null;
+        startTime.current = Date.now();
+      }
+      return;
+    }
+
     if (isDragging.current) {
       currentRotY.current += (targetRotY.current - currentRotY.current) * 0.25;
       currentRotX.current += (targetRotX.current - currentRotX.current) * 0.15;
@@ -878,7 +903,7 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange }: Card3DPr
   });
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} rotation={[0.12, -0.45, 0]}>
       <mesh geometry={geometry} material={materials} castShadow receiveShadow />
     </group>
   );
