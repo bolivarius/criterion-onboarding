@@ -226,6 +226,7 @@ export function StepCardCustomization({
   }, [personalName]); // eslint-disable-line react-hooks/exhaustive-deps -- only pre-fill when arriving with empty cardName
 
   const [showingBack, setShowingBack] = useState(false);
+  const [flipTrigger, setFlipTrigger] = useState(0);
 
   /* ─── Mouse follow: track normalised position inside the sky panel ─── */
   const skyRef = useRef<HTMLDivElement>(null);
@@ -269,13 +270,19 @@ export function StepCardCustomization({
           displayName={displayName}
           mousePos={mousePos}
           onShowingBackChange={setShowingBack}
+          flipTrigger={flipTrigger}
         />
 
-        {/* Hint — drag icon + disclaimer */}
+        {/* Hint — clickable rotate icon + disclaimer */}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
-          <div className="w-11 h-11 rounded-full border-2 border-white/50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
+          <button
+            type="button"
+            onClick={() => setFlipTrigger((t) => t + 1)}
+            className="w-11 h-11 rounded-full border-2 border-white/50 flex items-center justify-center bg-black/20 backdrop-blur-sm hover:bg-black/30 hover:border-white/70 active:scale-95 transition-all cursor-pointer"
+            aria-label="Rotate card"
+          >
             <RotateCw className="w-5 h-5 text-white" strokeWidth={2} />
-          </div>
+          </button>
           <p className="text-sm text-white/60 bg-black/20 backdrop-blur-sm rounded-full px-5 py-2">
             {showingBack ? "Viewing back" : "Viewing front"} · drag to rotate
           </p>

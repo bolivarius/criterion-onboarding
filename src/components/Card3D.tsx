@@ -36,6 +36,8 @@ interface Card3DProps {
   /** normalised mouse position inside the sky panel: {x: -1…1, y: -1…1} or null */
   mousePos?: { x: number; y: number } | null;
   onShowingBackChange?: (back: boolean) => void;
+  /** When this increments, flip the card to the other side */
+  flipTrigger?: number;
 }
 
 /* ═══════════════════════════════════════════
@@ -590,7 +592,7 @@ function useProceduralEnvMap() {
 /* ═══════════════════════════════════════════
  *  3D Card Mesh (inside Canvas)
  * ═══════════════════════════════════════════ */
-function CardMesh({ skin, displayName, mousePos, onShowingBackChange }: Card3DProps) {
+function CardMesh({ skin, displayName, mousePos, onShowingBackChange, flipTrigger }: Card3DProps) {
   const groupRef = useRef<THREE.Group>(null);
   const { gl } = useThree();
 
@@ -678,11 +680,11 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange }: Card3DPr
         normalScale: new THREE.Vector2(0.15, 0.15),
         roughness: 0.28,
         metalness: 0.05,
-        clearcoat: 0.9,
-        clearcoatRoughness: 0.12,
-        reflectivity: 0.6,
+        clearcoat: 0.6,
+        clearcoatRoughness: 0.15,
+        reflectivity: 0.4,
         envMap: envMap,
-        envMapIntensity: 0.8,
+        envMapIntensity: 0.2,
       }),
     [frontRes.texture, normalMap, envMap]
   );
@@ -695,11 +697,11 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange }: Card3DPr
         normalScale: new THREE.Vector2(0.15, 0.15),
         roughness: 0.28,
         metalness: 0.05,
-        clearcoat: 0.9,
-        clearcoatRoughness: 0.12,
-        reflectivity: 0.6,
+        clearcoat: 0.6,
+        clearcoatRoughness: 0.15,
+        reflectivity: 0.4,
         envMap: envMap,
-        envMapIntensity: 0.8,
+        envMapIntensity: 0.2,
       }),
     [backRes.texture, normalMap, envMap]
   );
@@ -746,14 +748,30 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange }: Card3DPr
   const momentumActive = useRef(false);
   const lastShowingBack = useRef(false);
   const mousePosRef = useRef<{ x: number; y: number } | null>(null);
-  // Entrance animation: tilt from left to right, leaning back, to show light effect
+  // Entrance animation: tilt left -> right -> settle, with vertical lean back
   const entranceStartTime = useRef<number | null>(Date.now());
-  const entranceDuration = 1.2; // seconds
+  const entranceDuration = 2; // seconds
+  // Flip-on-click: when flipTrigger changes, animate to opposite side
+  const lastFlipTrigger = useRef(flipTrigger ?? 0);
+  const flipTargetRotY = useRef<number | null>(null);
 
   // Keep mousePos ref in sync
   useEffect(() => {
     mousePosRef.current = mousePos ?? null;
   }, [mousePos]);
+
+  // When flipTrigger increments, queue flip to opposite side
+  useEffect(() => {
+    const trigger = flipTrigger ?? 0;
+    if (trigger !== lastFlipTrigger.current) {
+      lastFlipTrigger.current = trigger;
+      const normY = ((currentRotY.current % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+      const isBack = normY > Math.PI / 2 && normY < (Math.PI * 3) / 2;
+      flipTargetRotY.current = isBack ? 0 : Math.PI;
+      idleActive.current = false;
+      momentumActive.current = false;
+    }
+  }, [flipTrigger]);
 
   /* ─── Pointer handlers on the canvas DOM element ─── */
   useEffect(() => {
@@ -820,24 +838,49 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange }: Card3DPr
     if (!groupRef.current) return;
     const d = Math.min(delta, 0.05);
 
-    // Entrance: tilt from left to right, leaning back
+    // Entrance: tilt left -> right -> settle, with vertical lean back throughout
     if (entranceStartTime.current !== null) {
       const elapsed = (Date.now() - entranceStartTime.current) / 1000;
       const t = Math.min(elapsed / entranceDuration, 1);
-      const easeOut = 1 - (1 - t) * (1 - t); // ease-out quad
-      const startY = -0.45;
-      const endY = -0.08;
-      const startX = 0.12;
-      const endX = 0.03;
-      currentRotY.current = startY + (endY - startY) * easeOut;
-      currentRotX.current = startX + (endX - startX) * easeOut;
-      groupRef.current.rotation.y = currentRotY.current;
-      groupRef.current.rotation.x = currentRotX.current;
-      targetRotY.current = currentRotY.current;
-      targetRotX.current = currentRotX.current;
+      // Keyframes: 0% left+lean, 50% right+max lean, 100% settle
+      let rotY: number;
+      let rotX: number;
+      if (t < 0.5) {
+        const u = t * 2; // 0..1 over first half
+        const ease = 1 - (1 - u) * (1 - u);
+        rotY = -0.45 + (0.35 - -0.45) * ease;
+        rotX = 0.12 + (0.2 - 0.12) * ease;
+      } else {
+        const u = (t - 0.5) * 2; // 0..1 over second half
+        const ease = 1 - (1 - u) * (1 - u);
+        rotY = 0.35 + (-0.08 - 0.35) * ease;
+        rotX = 0.2 + (0.03 - 0.2) * ease;
+      }
+      currentRotY.current = rotY;
+      currentRotX.current = rotX;
+      groupRef.current.rotation.y = rotY;
+      groupRef.current.rotation.x = rotX;
+      targetRotY.current = rotY;
+      targetRotX.current = rotX;
       if (t >= 1) {
         entranceStartTime.current = null;
         startTime.current = Date.now();
+      }
+      return;
+    }
+
+    // Flip-on-click: animate toward target rotation
+    if (flipTargetRotY.current !== null) {
+      const target = flipTargetRotY.current;
+      currentRotY.current += (target - currentRotY.current) * 0.12;
+      groupRef.current.rotation.y = currentRotY.current;
+      targetRotY.current = currentRotY.current;
+      if (Math.abs(currentRotY.current - target) < 0.02) {
+        currentRotY.current = target;
+        groupRef.current.rotation.y = target;
+        flipTargetRotY.current = null;
+        startTime.current = Date.now();
+        idleActive.current = true;
       }
       return;
     }
@@ -917,6 +960,7 @@ export default function Card3DCanvas({
   displayName,
   mousePos,
   onShowingBackChange,
+  flipTrigger,
 }: Card3DProps) {
   return (
     <div
@@ -960,6 +1004,7 @@ export default function Card3DCanvas({
             displayName={displayName}
             mousePos={mousePos}
             onShowingBackChange={onShowingBackChange}
+            flipTrigger={flipTrigger}
           />
 
           {/* Ground shadow */}
