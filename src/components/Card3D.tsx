@@ -672,15 +672,13 @@ function CardMesh({ skin, displayName, mousePos, onShowingBackChange, flipTrigge
   }, [skin.id, skin.bg, skin.textColor, backRes]);
 
   /* ─── Materials (stable, update properties imperatively) ─── */
-  // Image cards: PBR + emissive lift — keeps reflexes, prevents darkening of base colors
+  // Image cards: PBR with high ambient compensation — exact base colors + lighting reflexes
   // Procedural cards: standard PBR
   const frontMat = useMemo(() => {
     if (skin.frontImage) {
       return new THREE.MeshPhysicalMaterial({
         map: frontRes.texture,
         color: 0xffffff,
-        emissive: 0xffffff,
-        emissiveIntensity: 0.22,
         normalMap: null,
         roughness: 0.25,
         metalness: 0.02,
@@ -1003,7 +1001,7 @@ export default function Card3DCanvas({
           antialias: true,
           alpha: true,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.22,
+          toneMappingExposure: 1.15,
         }}
         style={{ background: "transparent" }}
         onCreated={({ gl: renderer }) => {
@@ -1011,8 +1009,8 @@ export default function Card3DCanvas({
         }}
       >
         <Suspense fallback={null}>
-          {/* Lighting — ambient + directional; emissive on card lifts base without killing reflexes */}
-          <ambientLight intensity={0.88} />
+          {/* Lighting — high ambient preserves base colors, directional + env give reflexes */}
+          <ambientLight intensity={0.92} />
           <directionalLight
             position={[3, 4, 5]}
             intensity={1.0}
